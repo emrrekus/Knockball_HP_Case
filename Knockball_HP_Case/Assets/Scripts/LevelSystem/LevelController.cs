@@ -2,6 +2,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class LevelController : MonoBehaviour
@@ -22,5 +23,7 @@ public class LevelController : MonoBehaviour
     public int GetNeededBall(int i)
     {
         return _levels[i].NeededBall;
+
+       
     }
 }

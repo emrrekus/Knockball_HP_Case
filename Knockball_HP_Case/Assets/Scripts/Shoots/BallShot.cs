@@ -10,7 +10,7 @@ public class BallShot : MonoBehaviour
     [SerializeField] private CannonAnim _cannonAnim;
     [SerializeField] private CannonRotation _cannonRotation;
 
-  
+    private bool CanShoot;
 
     private void Awake()
     {
@@ -29,6 +29,7 @@ public class BallShot : MonoBehaviour
 
     void Shoot()
     {
+        if(!GameManager.Instance.CanShoot) return;
         var inst = _ballObjectPooling.GetBall();
         inst.transform.position = _ballObjectPooling.SpawnPoint.position;
         

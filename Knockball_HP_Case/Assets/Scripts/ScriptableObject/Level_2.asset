@@ -12,6 +12,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 10288470b432c9f478cc1128978b6d1b, type: 3}
   m_Name: Level_2
   m_EditorClassIdentifier: 
-  _level: 2
+  _level: 1
   _childCount: 22
   _neededBall: 7

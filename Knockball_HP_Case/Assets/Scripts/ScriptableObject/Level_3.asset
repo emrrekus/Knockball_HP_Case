@@ -13,5 +13,5 @@ MonoBehaviour:
   m_Name: Level_3
   m_EditorClassIdentifier: 
   _level: 2
-  _childCount: 22
-  _neededBall: 7
+  _childCount: 21
+  _neededBall: 8
