@@ -5,6 +5,7 @@ using DG.Tweening;
 using Unity.VisualScripting;
 using UnityEngine;
 
+
 public class GameManager : MonoBehaviour
 {
     public static GameManager Instance { get; private set; }
@@ -19,36 +20,49 @@ public class GameManager : MonoBehaviour
 
         Instance = this;
         DontDestroyOnLoad(this.gameObject);
+
+        _beginLevel = 0;
     }
 
-    [SerializeField] private GameObject[] _levels;
+
+    [Header("Levels")] [SerializeField] private GameObject[] _levels;
+    private int _beginLevel;
+    private int _currentLevel;
+    private bool _isLevelCompleted;
+    public int CurrentLevel => _currentLevel;
+
+    public event Func<int, int> levelCurrentBall;
+    public event Func<int, int> levelCurrentChildCount;
+
 
     public int CurrentBall;
     public int ChildCount;
 
-    private int _beginLevel = 0;
-    private int _currentLevel;
+    private float _currentTime;
+    public event Action<float, bool> timer;
+
     private float _droppedObject;
-    private float _score;
-
     private bool _isDroppedCompleted;
-
-    private bool _isCanShoot = true;
-
-    public bool CanShoot => _isCanShoot;
-    public int CurrentLevel => _currentLevel;
     public float DroppedObject => _droppedObject;
-    public float NeededBall;
+
+    private float _score;
     public float Point => _score;
-    
+    private bool _isCanShoot = true;
+    public bool CanShoot => _isCanShoot;
+
+
+    public float NeededBall;
+
+
     public event Action vignetteOpen;
     public event Action vignetteClose;
-    public event Func<int, int> levelCurrentBall;
-    public event Func<int, int> levelCurrentChildCount;
+
+    public event Action loseUI;
+
 
     private void Start()
     {
-        _isCanShoot = true;
+        _isCanShoot = false;
         Startup();
     }
 
@@ -56,6 +70,7 @@ public class GameManager : MonoBehaviour
     private void Update()
     {
         LevelControll();
+        SaveScore();
     }
 
     public void CameraShake(float shakeDuration, float shakeStrenght)
@@ -67,16 +82,30 @@ public class GameManager : MonoBehaviour
 
     public void LevelControll()
     {
-        if (CurrentBall <= 0 && !_isDroppedCompleted) Lose();
+        if (CurrentBall <= 0)
+        {
+            Timer(true);
+            vignetteOpen?.Invoke();
+        }
+
+        if (_currentTime > 5)
+        {
+            Timer(false);
+            Lose();
+            _currentTime = 0;
+        }
+
         if (_isDroppedCompleted)
         {
+            vignetteClose?.Invoke();
+            Timer(false);
             LevelUp();
         }
     }
 
     public void LevelUp()
     {
-        vignetteClose?.Invoke();
+        _currentTime = 0f;
         _isCanShoot = true;
         _isDroppedCompleted = false;
         _levels[_currentLevel].SetActive(false);
@@ -93,18 +122,17 @@ public class GameManager : MonoBehaviour
 
         CurrentLevelDefinition(_currentLevel);
         _droppedObject = 0f;
+        _isLevelCompleted = true;
     }
 
     public void Lose()
     {
-        Debug.Log("Loseee");
         _isCanShoot = false;
-        vignetteOpen?.Invoke();
         _isDroppedCompleted = false;
-        return;
+        loseUI?.Invoke();
     }
 
-    private void Startup()
+    public void Startup()
     {
         _currentLevel = _beginLevel;
         CurrentLevelDefinition(_currentLevel);
@@ -113,7 +141,7 @@ public class GameManager : MonoBehaviour
     public bool DroppedObjectCheck(float fallingObject)
     {
         _droppedObject = fallingObject;
-       
+
 
         if (_droppedObject >= ChildCount)
         {
@@ -137,8 +165,24 @@ public class GameManager : MonoBehaviour
     public void Score(float score)
     {
         _score += score;
-        Debug.Log(_score);
     }
-    
-    
+
+    private void Timer(bool activity)
+    {
+        _isCanShoot = activity ? false : true;
+        _currentTime += Time.deltaTime;
+        timer?.Invoke(_currentTime, activity);
+    }
+
+    public void GameisPlay(bool canPlay)
+    {
+        _isCanShoot = canPlay;
+    }
+
+
+    private void SaveScore()
+    {
+        if (_score > ScoreData.GetPlayerScore())
+            ScoreData.SavePlayerScore(_score);
+    }
 }

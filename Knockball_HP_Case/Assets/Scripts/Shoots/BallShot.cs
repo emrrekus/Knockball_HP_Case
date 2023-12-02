@@ -8,14 +8,13 @@ public class BallShot : MonoBehaviour
     [SerializeField] private float firePower;
     [SerializeField] private BallObjectPooling _ballObjectPooling;
     [SerializeField] private CannonAnim _cannonAnim;
-    [SerializeField] private CannonRotation _cannonRotation;
+
 
     private bool CanShoot;
 
     private void Awake()
     {
         _ballObjectPooling = GetComponent<BallObjectPooling>();
-        _cannonRotation = GetComponent<CannonRotation>();
     }
 
     private void Update()
@@ -23,16 +22,15 @@ public class BallShot : MonoBehaviour
         if (Input.GetMouseButtonDown(0))
         {
             Shoot();
-            
         }
     }
 
     void Shoot()
     {
-        if(!GameManager.Instance.CanShoot) return;
+        if (!GameManager.Instance.CanShoot) return;
         var inst = _ballObjectPooling.GetBall();
         inst.transform.position = _ballObjectPooling.SpawnPoint.position;
-        
+
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
         Vector3 dir = ray.direction.normalized;
 
