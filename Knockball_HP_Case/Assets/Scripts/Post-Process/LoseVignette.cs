@@ -10,7 +10,10 @@ public class LoseVignette : MonoBehaviour
 {
     [SerializeField] private PostProcessProfile _postProcessProfile;
     [SerializeField] private Vignette vignette;
-    [SerializeField] private float duration;
+    [SerializeField] private float _durationOpen;
+    [SerializeField] private float _durationClose;
+
+    
 
     private void Awake()
     {
@@ -21,34 +24,71 @@ public class LoseVignette : MonoBehaviour
 
     private void Start()
     {
-        GameManager.Instance.vignette += Lose;
+    
+    }
+
+    private void OnEnable()
+    {
+        GameManager.Instance.vignetteOpen += VignetteOpen;
+        GameManager.Instance.vignetteClose += VignetteClose;
     }
 
     private void OnDisable()
     {
-        GameManager.Instance.vignette -= Lose;
+        GameManager.Instance.vignetteOpen -= VignetteOpen;
+        GameManager.Instance.vignetteClose += VignetteClose;
     }
 
-    public void Lose()
+    public void VignetteOpen()
     {
-        StartCoroutine(ChangeVignetteOverTime());
+      StartCoroutine(ChangeVignetteOverTime());
+    }
+
+    public void VignetteClose()
+    {
+        StartCoroutine(ChangeVignetteOverTimeReverse());
     }
 
     IEnumerator ChangeVignetteOverTime()
     {
+      
         float elapsedTime = 0f;
 
         var startIntensity = vignette.intensity.value;
-        var startSmoothness = vignette.smoothness.value;
-
-        while (elapsedTime < duration)
+        var startSmoothness = vignette.smoothness.value;  
+        
+        while (elapsedTime < _durationOpen)
         {
             elapsedTime += Time.deltaTime;
 
-            vignette.intensity.value = Mathf.Lerp(startIntensity, 1f, elapsedTime / duration);
-            vignette.smoothness.value = Mathf.Lerp(startSmoothness, 1f, elapsedTime / duration);
+            vignette.intensity.value = Mathf.Lerp(startIntensity, 1f, elapsedTime / _durationOpen);
+            vignette.smoothness.value = Mathf.Lerp(startSmoothness, 1f, elapsedTime / _durationOpen);
 
             yield return null;
         }
     }
+    
+    IEnumerator ChangeVignetteOverTimeReverse()
+    {
+       
+        float elapsedTime = 0f;
+
+        var startIntensity = vignette.intensity.value;
+        var startSmoothness = vignette.smoothness.value;  
+
+        while (elapsedTime < _durationClose)
+        {
+            elapsedTime += Time.deltaTime;
+
+            vignette.intensity.value = Mathf.Lerp(startIntensity, 0f, elapsedTime / _durationClose);
+            vignette.smoothness.value = Mathf.Lerp(startSmoothness, 0f, elapsedTime / _durationClose);
+
+            yield return null;
+        }
+
+        
+    }
+    
+    
+  
 }

@@ -16,6 +16,8 @@ public class BallObjectPooling : MonoBehaviour
     private void Awake()
     {
         _ballPool = new ObjectPool<GameObject>(CreatePoolBall, OnGetPoolBall, OnReleasePoolObject, OnDestroyFromPool);
+        
+        
     }
 
     private void OnDestroyFromPool(GameObject obj)
@@ -28,6 +30,8 @@ public class BallObjectPooling : MonoBehaviour
         if (obj.TryGetComponent<Ball>(out var ball))
         {
             ball.enabled = false;
+            ball.GameObjectSetActive(false);
+            
         }
     }
 
@@ -36,6 +40,7 @@ public class BallObjectPooling : MonoBehaviour
         if (obj.TryGetComponent<Ball>(out var ball))
         {
             ball.enabled = true;
+            ball.GameObjectSetActive(true);
             ball.ResetSpawnTime();
         }
     }

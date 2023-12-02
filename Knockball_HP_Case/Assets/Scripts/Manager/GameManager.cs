@@ -28,15 +28,21 @@ public class GameManager : MonoBehaviour
 
     private int _beginLevel = 0;
     private int _currentLevel;
-    private int _droppedObject;
+    private float _droppedObject;
+    private float _score;
 
     private bool _isDroppedCompleted;
 
     private bool _isCanShoot = true;
 
     public bool CanShoot => _isCanShoot;
-
-    public event Action vignette;
+    public int CurrentLevel => _currentLevel;
+    public float DroppedObject => _droppedObject;
+    public float NeededBall;
+    public float Point => _score;
+    
+    public event Action vignetteOpen;
+    public event Action vignetteClose;
     public event Func<int, int> levelCurrentBall;
     public event Func<int, int> levelCurrentChildCount;
 
@@ -61,7 +67,7 @@ public class GameManager : MonoBehaviour
 
     public void LevelControll()
     {
-        if (CurrentBall <= 0) Lose();
+        if (CurrentBall <= 0 && !_isDroppedCompleted) Lose();
         if (_isDroppedCompleted)
         {
             LevelUp();
@@ -70,6 +76,8 @@ public class GameManager : MonoBehaviour
 
     public void LevelUp()
     {
+        vignetteClose?.Invoke();
+        _isCanShoot = true;
         _isDroppedCompleted = false;
         _levels[_currentLevel].SetActive(false);
         _currentLevel++;
@@ -84,13 +92,14 @@ public class GameManager : MonoBehaviour
         _levels[_currentLevel].SetActive(true);
 
         CurrentLevelDefinition(_currentLevel);
+        _droppedObject = 0f;
     }
 
     public void Lose()
     {
         Debug.Log("Loseee");
         _isCanShoot = false;
-        vignette?.Invoke();
+        vignetteOpen?.Invoke();
         _isDroppedCompleted = false;
         return;
     }
@@ -101,9 +110,10 @@ public class GameManager : MonoBehaviour
         CurrentLevelDefinition(_currentLevel);
     }
 
-    public bool DroppedObjectCheck(int fallingObject)
+    public bool DroppedObjectCheck(float fallingObject)
     {
         _droppedObject = fallingObject;
+       
 
         if (_droppedObject >= ChildCount)
         {
@@ -119,6 +129,16 @@ public class GameManager : MonoBehaviour
     private void CurrentLevelDefinition(int currentLevel)
     {
         CurrentBall = levelCurrentBall.Invoke(currentLevel);
+        NeededBall = CurrentBall;
         ChildCount = levelCurrentChildCount.Invoke(currentLevel);
     }
+
+
+    public void Score(float score)
+    {
+        _score += score;
+        Debug.Log(_score);
+    }
+    
+    
 }

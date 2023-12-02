@@ -4,13 +4,14 @@ using System.Collections.Generic;
 using DG.Tweening;
 using UnityEngine;
 
-public class ExplodeCube : MonoBehaviour
+public class ExplodeCube : Cube
 {
     [SerializeField] private float explosionForce;
     [SerializeField] private float explosionRadius;
     [SerializeField] private ParticleSystem _explodePartical;
     [SerializeField] private float _shakeDuration;
     [SerializeField] private float _shakeStrenght;
+    
 
     private void Start()
     {
@@ -21,11 +22,10 @@ public class ExplodeCube : MonoBehaviour
     {
         if (collision.gameObject.CompareTag("Ball"))
         {
+            GameManager.Instance.CameraShake(_shakeDuration, _shakeStrenght);
 
-            GameManager.Instance.CameraShake(_shakeDuration,_shakeStrenght);
             _explodePartical.Play();
             Explode();
-            
         }
     }
 
@@ -42,6 +42,4 @@ public class ExplodeCube : MonoBehaviour
             }
         }
     }
-
-  
 }
