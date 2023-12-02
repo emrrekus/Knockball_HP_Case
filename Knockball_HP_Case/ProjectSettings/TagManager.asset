@@ -6,11 +6,13 @@ TagManager:
   tags:
   - Ball
   - Object
+  - FxTemporaire
+  - Explode
   layers:
   - Default
   - TransparentFX
   - Ignore Raycast
-  - 
+  - Explode
   - Water
   - UI
   - 

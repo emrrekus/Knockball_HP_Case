@@ -21,8 +21,6 @@ public class GameManager : MonoBehaviour
         DontDestroyOnLoad(this.gameObject);
     }
 
-    [SerializeField] private LevelController _levelController;
-    [SerializeField] private LoseVignette _loseVignette;
     [SerializeField] private GameObject[] _levels;
 
     public int CurrentBall;
@@ -32,7 +30,6 @@ public class GameManager : MonoBehaviour
     private int _currentLevel;
     private int _droppedObject;
 
-    private bool _isLevelCompleted;
     private bool _isDroppedCompleted;
 
     private bool _isCanShoot = true;
@@ -40,6 +37,9 @@ public class GameManager : MonoBehaviour
     public bool CanShoot => _isCanShoot;
 
     public event Action vignette;
+    public event Func<int, int> levelCurrentBall;
+    public event Func<int, int> levelCurrentChildCount;
+
     private void Start()
     {
         _isCanShoot = true;
@@ -88,15 +88,15 @@ public class GameManager : MonoBehaviour
 
     public void Lose()
     {
-        
+        Debug.Log("Loseee");
         _isCanShoot = false;
         vignette?.Invoke();
-        
+        _isDroppedCompleted = false;
+        return;
     }
 
     private void Startup()
     {
-        
         _currentLevel = _beginLevel;
         CurrentLevelDefinition(_currentLevel);
     }
@@ -118,7 +118,7 @@ public class GameManager : MonoBehaviour
 
     private void CurrentLevelDefinition(int currentLevel)
     {
-        CurrentBall = _levelController.GetNeededBall(currentLevel);
-        ChildCount = _levelController.GetLevelChildCount(currentLevel);
+        CurrentBall = levelCurrentBall.Invoke(currentLevel);
+        ChildCount = levelCurrentChildCount.Invoke(currentLevel);
     }
 }

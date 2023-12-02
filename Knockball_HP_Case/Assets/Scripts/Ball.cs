@@ -5,8 +5,10 @@ using UnityEngine;
 
 public class Ball : MonoBehaviour
 {
+   [SerializeField] private ParticleSystem _boomParticle;
    [SerializeField] private Rigidbody rb;
    [SerializeField] private float _lifetime;
+   
    private float _spawnTime;
    public Rigidbody Rigibody => rb;
    
@@ -15,6 +17,7 @@ public class Ball : MonoBehaviour
 
    private void Start()
    {
+      _boomParticle.Stop();
       InvokeRepeating("UpdateKinematic",5f, 5f);
    }
 
@@ -40,6 +43,15 @@ public class Ball : MonoBehaviour
 
    private void UpdateKinematic()
    {
+      
       rb.isKinematic = true;
+   }
+
+   private void OnCollisionEnter(Collision collision)
+   {
+      if (collision.gameObject.CompareTag("Explode"))
+      {
+         _boomParticle.Play();
+      }
    }
 }

@@ -6,19 +6,16 @@ using UnityEngine;
 public class FallingBox : MonoBehaviour
 {
     private int _fallingObject;
+    [SerializeField] private string _triggerObjectName;
 
 
     private void OnTriggerEnter(Collider other)
     {
-        if (other.CompareTag("Object"))
+        if (other.CompareTag(_triggerObjectName) || other.CompareTag("Explode"))
         {
             _fallingObject++;
-            Debug.Log(_fallingObject);
-            if (GameManager.Instance.DroppedObjectCheck(_fallingObject))
-            {
-                _fallingObject = 0;
-            }
-           
+
+            if (GameManager.Instance.DroppedObjectCheck(_fallingObject)) _fallingObject = 0;
         }
     }
 }

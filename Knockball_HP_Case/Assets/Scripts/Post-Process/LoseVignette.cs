@@ -2,18 +2,19 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Rendering;
 using UnityEngine.Rendering.PostProcessing;
 
 
 public class LoseVignette : MonoBehaviour
 {
-    [SerializeField] public PostProcessProfile vignetteProfile;
-    private Vignette vignette;
-    [SerializeField] private float _duration;
+    [SerializeField] private PostProcessProfile _postProcessProfile;
+    [SerializeField] private Vignette vignette;
+    [SerializeField] private float duration;
 
     private void Awake()
     {
-        vignette = vignetteProfile.GetSetting<Vignette>();
+        vignette = _postProcessProfile.GetSetting<Vignette>();
         vignette.intensity.value = 0f;
         vignette.smoothness.value = 0f;
     }
@@ -22,7 +23,6 @@ public class LoseVignette : MonoBehaviour
     {
         GameManager.Instance.vignette += Lose;
     }
-
 
     private void OnDisable()
     {
@@ -37,16 +37,16 @@ public class LoseVignette : MonoBehaviour
     IEnumerator ChangeVignetteOverTime()
     {
         float elapsedTime = 0f;
-        
+
         var startIntensity = vignette.intensity.value;
         var startSmoothness = vignette.smoothness.value;
 
-        while (elapsedTime < _duration)
+        while (elapsedTime < duration)
         {
             elapsedTime += Time.deltaTime;
 
-            vignette.intensity.value = Mathf.Lerp(startIntensity, 1f, elapsedTime / _duration);
-            vignette.smoothness.value = Mathf.Lerp(startSmoothness, 1f, elapsedTime / _duration);
+            vignette.intensity.value = Mathf.Lerp(startIntensity, 1f, elapsedTime / duration);
+            vignette.smoothness.value = Mathf.Lerp(startSmoothness, 1f, elapsedTime / duration);
 
             yield return null;
         }
