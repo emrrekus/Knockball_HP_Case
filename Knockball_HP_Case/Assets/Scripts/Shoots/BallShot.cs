@@ -33,9 +33,9 @@ public class BallShot : MonoBehaviour
         inst.transform.position = _ballObjectPooling.SpawnPoint.position;
         
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-        Vector3 dir = ray.direction.normalized; 
+        Vector3 dir = ray.direction.normalized;
 
-       
+        GameManager.Instance.CurrentBall--;
         _cannonAnim.ShootAnim();
         if (inst.TryGetComponent<Ball>(out var ball))
         {
