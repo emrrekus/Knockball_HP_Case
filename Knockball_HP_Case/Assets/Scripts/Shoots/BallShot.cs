@@ -47,6 +47,7 @@ public class BallShot : MonoBehaviour
 
         GameManager.Instance.CurrentBall--;
         _cannonAnim.ShootAnim();
+        AudioManager.Instance.PlayOneShotClip(0);
 
         if (inst.TryGetComponent<Ball>(out var ball))
         {

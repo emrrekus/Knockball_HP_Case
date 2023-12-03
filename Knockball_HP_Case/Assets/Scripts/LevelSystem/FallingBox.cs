@@ -21,6 +21,7 @@ public class FallingBox : MonoBehaviour
 
         if (other.TryGetComponent<Cube>(out var cube))
         {
+           
             GameManager.Instance.Score(cube.Point);
         }
     }

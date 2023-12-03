@@ -40,10 +40,12 @@ public class GameManager : MonoBehaviour
     public int ChildCount;
 
     private float _currentTime;
+    private float _clipsPlay;
     public event Action<float, bool> timer;
 
     private float _droppedObject;
     private bool _isDroppedCompleted;
+  
     public float DroppedObject => _droppedObject;
 
     private float _score;
@@ -55,8 +57,6 @@ public class GameManager : MonoBehaviour
     public float NeededBall;
 
     public bool isWinorLosePanelOpen;
-
-
 
 
     public event Action loseUI;
@@ -87,23 +87,22 @@ public class GameManager : MonoBehaviour
 
     public void LevelControll()
     {
+        
         if (CurrentBall <= 0)
         {
-            Timer(true,false);
-           
+            Timer(true, false);
         }
 
         if (_currentTime > 5)
         {
-            Timer(false,true);
+            Timer(false, true);
             Lose();
-            _currentTime = 0;
         }
+
 
         if (_isDroppedCompleted)
         {
-            
-            Timer(false,true);
+            Timer(false, true);
             LevelUp();
         }
     }
@@ -111,13 +110,13 @@ public class GameManager : MonoBehaviour
     public void LevelUp()
     {
         _currentTime = 0f;
-      
+        
         _isDroppedCompleted = false;
 
         levelOpenAndClose?.Invoke(_currentLevel, false);
         _currentLevel++;
 
-
+        AudioManager.Instance.PlayOneShotClip(2);
         if (_currentLevel == levelsLenght?.Invoke())
         {
             winUI?.Invoke();
@@ -135,17 +134,23 @@ public class GameManager : MonoBehaviour
 
     public void Lose()
     {
+        
+        if (_clipsPlay < 1)
+            AudioManager.Instance.PlayOneShotClip(3);
+
+        _clipsPlay++;
         _isCanShoot = false;
         _isDroppedCompleted = false;
+        _currentTime = 0;
         loseUI?.Invoke();
     }
 
     public void Startup()
     {
+        _clipsPlay = 0;
+        Timer(false, false);
         isWinorLosePanelOpen = false;
         _isCanShoot = false;
-        Timer(false,false);
-
         _score = _beginScore;
         levelOpenAndClose?.Invoke(_currentLevel, false);
         _currentLevel = _beginLevel;
@@ -182,7 +187,7 @@ public class GameManager : MonoBehaviour
         _score += score;
     }
 
-    private void Timer(bool activity,bool canShoot)
+    private void Timer(bool activity, bool canShoot)
     {
         _isCanShoot = canShoot;
         _currentTime += Time.deltaTime;

@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
@@ -16,21 +17,25 @@ public class UIManager : MonoBehaviour
 
     [SerializeField] private Image _bacgroundBallsCount;
 
-    [Header("Score")] 
-    [SerializeField] private TMP_Text _score;
+    [Header("Score")] [SerializeField] private TMP_Text _score;
     [SerializeField] private TMP_Text _bestScore;
     [SerializeField] private TMP_Text _loseScoreText;
     [SerializeField] private TMP_Text _winScoreText;
     [Header("Time")] [SerializeField] private TMP_Text _time;
     [SerializeField] private GameObject _timerObject;
+    [Header("Audio")] [SerializeField] private GameObject _audioSlider;
+    [SerializeField] private Slider _slider;
 
     [Header("UIs")] [SerializeField] private GameObject[] gameUI;
 
+
+    private bool _sliderActivity;
     private int _activeUI;
     private int _touchCount;
 
     private void Start()
     {
+        _slider.value = AudioVolumeData.GetAudioVolume();
         BestScore();
     }
 
@@ -53,6 +58,8 @@ public class UIManager : MonoBehaviour
         LevelBar();
         BallsCount();
         Score();
+        TouchStart();
+        SliderValue();
     }
 
 
@@ -80,6 +87,7 @@ public class UIManager : MonoBehaviour
         _time.text = string.Format("{0:D2},{1:D3}", timeSpan.Seconds, timeSpan.Milliseconds);
     }
 
+
     private void BestScore()
     {
         _bestScore.text = "Best: " + ScoreData.GetPlayerScore().ToString();
@@ -96,11 +104,18 @@ public class UIManager : MonoBehaviour
     {
         _touchCount = Input.touchCount;
 
-        if (_touchCount > 0)
+        if (Input.touchCount > 0 && Input.GetTouch(0).phase == TouchPhase.Began)
         {
-            PlayGame();
+            Vector3 touchPosition = Input.GetTouch(0).position;
+            if (EventSystem.current.IsPointerOverGameObject(Input.GetTouch(0).fingerId))
+            {
+                Debug.Log("Button Clicked!");
+            }
+            else
+            {
+                PlayGame();
+            }
         }
-        
     }
 
     private void LoseGame()
@@ -108,7 +123,7 @@ public class UIManager : MonoBehaviour
         GameManager.Instance.isWinorLosePanelOpen = true;
         gameUI[1].SetActive(false);
         gameUI[2].SetActive(true);
-        _loseScoreText.text = "Score: "+ _score.text;
+        _loseScoreText.text = "Score: " + _score.text;
     }
 
     private void WinGame()
@@ -116,7 +131,7 @@ public class UIManager : MonoBehaviour
         GameManager.Instance.isWinorLosePanelOpen = true;
         gameUI[1].SetActive(false);
         gameUI[3].SetActive(true);
-        _winScoreText.text = "Score: "+ _score.text;
+        _winScoreText.text = "Score: " + _score.text;
     }
 
     public void QuitGame()
@@ -135,7 +150,17 @@ public class UIManager : MonoBehaviour
         gameUI[0].SetActive(true);
         GameManager.Instance.Startup();
         SceneManager.LoadScene("Scenes/SampleScene");
+    }
 
+    public void AudioSettings()
+    {
+        _sliderActivity = !_sliderActivity;
+        _audioSlider.SetActive(_sliderActivity);
+    }
 
+    private void SliderValue()
+    {
+        if (_slider.value != AudioVolumeData.GetAudioVolume())
+            AudioVolumeData.SaveAudioVolume(_slider.value);
     }
 }

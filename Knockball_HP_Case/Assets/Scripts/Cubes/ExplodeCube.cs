@@ -23,7 +23,7 @@ public class ExplodeCube : Cube
         if (collision.gameObject.CompareTag("Ball"))
         {
             GameManager.Instance.CameraShake(_shakeDuration, _shakeStrenght);
-
+            AudioManager.Instance.PlayOneShotClip(1);
             _explodePartical.Play();
             Explode();
         }
