@@ -9,7 +9,7 @@ public class FallingBox : MonoBehaviour
     [SerializeField] private string _triggerObjectName;
     [SerializeField] private string _triggerSecondObjectName;
 
-
+    //We provide control of the dropped objects and if the dropped object is a cube, we add its current point value to the score we keep in the game manager.
     private void OnTriggerEnter(Collider other)
     {
         if (other.CompareTag(_triggerObjectName) || other.CompareTag(_triggerSecondObjectName))
@@ -21,8 +21,7 @@ public class FallingBox : MonoBehaviour
 
         if (other.TryGetComponent<Cube>(out var cube))
         {
-           
-            GameManager.Instance.Score(cube.Point);
+           GameManager.Instance.Score(cube.Point);
         }
     }
 }

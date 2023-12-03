@@ -24,7 +24,9 @@ public class BallShot : MonoBehaviour
             Shoot();
         }
     }
-
+    
+    //Both PC and mobile compatible shoot mechanics. We play shooting mechanics, animations and sounds that should play in shooting mechanics.
+    
     void Shoot()
     {
         if (!GameManager.Instance.CanShoot) return;

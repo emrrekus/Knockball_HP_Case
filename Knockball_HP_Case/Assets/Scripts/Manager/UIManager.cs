@@ -17,21 +17,27 @@ public class UIManager : MonoBehaviour
 
     [SerializeField] private Image _bacgroundBallsCount;
 
-    [Header("Score")] [SerializeField] private TMP_Text _score;
+    [Header("Score")] 
+    [SerializeField] private TMP_Text _score;
     [SerializeField] private TMP_Text _bestScore;
     [SerializeField] private TMP_Text _loseScoreText;
     [SerializeField] private TMP_Text _winScoreText;
+
     [Header("Time")] [SerializeField] private TMP_Text _time;
     [SerializeField] private GameObject _timerObject;
+
     [Header("Audio")] [SerializeField] private GameObject _audioSlider;
     [SerializeField] private Slider _slider;
 
     [Header("UIs")] [SerializeField] private GameObject[] gameUI;
 
+    [Header("Buttons")] [SerializeField] private GameObject _mainMenuButtons;
+    [SerializeField] private GameObject _exitButtons;
+
 
     private bool _sliderActivity;
     private int _activeUI;
-    private int _touchCount;
+
 
     private void Start()
     {
@@ -63,6 +69,59 @@ public class UIManager : MonoBehaviour
     }
 
 
+    #region UI Buttons
+
+    private void LoseGame()
+    {
+        GameManager.Instance.isWinorLosePanelOpen = true;
+        _mainMenuButtons.SetActive(false);
+        _exitButtons.SetActive(false);
+        gameUI[1].SetActive(false);
+        gameUI[2].SetActive(true);
+        _loseScoreText.text = "Score: " + _score.text;
+    }
+
+    private void WinGame()
+    {
+        GameManager.Instance.isWinorLosePanelOpen = true;
+        _mainMenuButtons.SetActive(false);
+        _exitButtons.SetActive(false);
+        gameUI[1].SetActive(false);
+        gameUI[3].SetActive(true);
+        _winScoreText.text = "Score: " + _score.text;
+    }
+
+    public void QuitGame()
+    {
+#if UNITY_EDITOR
+        UnityEditor.EditorApplication.isPlaying = false;
+#else
+        Application.Quit();
+#endif
+    }
+
+    public void TryGame()
+    {
+        gameUI[GameManager.Instance.CurrentLevel].SetActive(false);
+        _mainMenuButtons.SetActive(true);
+        _exitButtons.SetActive(true);
+        gameUI[0].SetActive(true);
+        GameManager.Instance.Startup();
+        SceneManager.LoadScene("Scenes/SampleScene");
+    }
+    
+    public void PlayGame()
+    {
+        GameManager.Instance.GameisPlay(true);
+        gameUI[0].SetActive(false);
+        gameUI[1].SetActive(true);
+    }
+
+    #endregion
+
+
+    #region UI Text
+
     private void LevelBar()
     {
         _level.text = (GameManager.Instance.CurrentLevel + 1).ToString();
@@ -93,17 +152,28 @@ public class UIManager : MonoBehaviour
         _bestScore.text = "Best: " + ScoreData.GetPlayerScore().ToString();
     }
 
-    public void PlayGame()
+    #endregion
+
+    #region  UI Audio
+
+    public void AudioSettings()
     {
-        GameManager.Instance.GameisPlay(true);
-        gameUI[0].SetActive(false);
-        gameUI[1].SetActive(true);
+        _sliderActivity = !_sliderActivity;
+        _audioSlider.SetActive(_sliderActivity);
     }
+
+    private void SliderValue()
+    {
+        if (_slider.value != AudioVolumeData.GetAudioVolume())
+            AudioVolumeData.SaveAudioVolume(_slider.value);
+    }
+
+    #endregion
+
+   
 
     public void TouchStart()
     {
-        _touchCount = Input.touchCount;
-
         if (Input.touchCount > 0 && Input.GetTouch(0).phase == TouchPhase.Began)
         {
             Vector3 touchPosition = Input.GetTouch(0).position;
@@ -118,49 +188,6 @@ public class UIManager : MonoBehaviour
         }
     }
 
-    private void LoseGame()
-    {
-        GameManager.Instance.isWinorLosePanelOpen = true;
-        gameUI[1].SetActive(false);
-        gameUI[2].SetActive(true);
-        _loseScoreText.text = "Score: " + _score.text;
-    }
 
-    private void WinGame()
-    {
-        GameManager.Instance.isWinorLosePanelOpen = true;
-        gameUI[1].SetActive(false);
-        gameUI[3].SetActive(true);
-        _winScoreText.text = "Score: " + _score.text;
-    }
-
-    public void QuitGame()
-    {
-#if UNITY_EDITOR
-        UnityEditor.EditorApplication.isPlaying = false;
-#else
-        Application.Quit();
-#endif
-    }
-
-    public void TryGame(int openPanel)
-    {
-        _touchCount = 0;
-        gameUI[openPanel].SetActive(false);
-        gameUI[0].SetActive(true);
-        GameManager.Instance.Startup();
-        SceneManager.LoadScene("Scenes/SampleScene");
-    }
-
-    public void AudioSettings()
-    {
-        _sliderActivity = !_sliderActivity;
-        _audioSlider.SetActive(_sliderActivity);
-    }
-
-    private void SliderValue()
-    {
-        if (_slider.value != AudioVolumeData.GetAudioVolume())
-            AudioVolumeData.SaveAudioVolume(_slider.value);
-    }
+   
 }

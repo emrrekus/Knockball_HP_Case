@@ -26,21 +26,23 @@ public class LevelController : MonoBehaviour
         GameManager.Instance.levelsLenght -= GetLevelLenght;
     }
 
-
+    #region Level Region
+     //I transfer the data that I have kept level scriptableobject to the gamemanager with the event
     public int GetLevelChildCount(int i)
     {
         return _levels[i].ChildCount;
     }
 
-    public int GetCurrentLevel(int i)
-    {
-        return _levels[i].Level;
-    }
 
     public int GetNeededBall(int i)
     {
         return _levels[i].NeededBall;
     }
+
+    #endregion
+
+
+    #region LevelGameObjectSettings
 
     public void LevelOpenAndClose(int level, bool activiy)
     {
@@ -49,7 +51,9 @@ public class LevelController : MonoBehaviour
 
     public int GetLevelLenght()
     {
-       
         return _levelGameObjects.Length;
     }
+
+    #endregion
+   
 }
