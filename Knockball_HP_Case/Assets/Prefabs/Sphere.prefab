@@ -149,7 +149,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   rb: {fileID: 0}
-  _lifetime: 5
+  _lifetime: 20
 --- !u!1 &5111744153498929373
 GameObject:
   m_ObjectHideFlags: 0

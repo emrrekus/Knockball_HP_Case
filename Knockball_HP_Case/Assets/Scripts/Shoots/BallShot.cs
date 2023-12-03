@@ -28,18 +28,31 @@ public class BallShot : MonoBehaviour
     void Shoot()
     {
         if (!GameManager.Instance.CanShoot) return;
+
         var inst = _ballObjectPooling.GetBall();
         inst.transform.position = _ballObjectPooling.SpawnPoint.position;
 
-        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+        Ray ray;
+
+        if (Input.touchCount > 0 && Input.GetTouch(0).phase == TouchPhase.Began)
+        {
+            ray = Camera.main.ScreenPointToRay(Input.GetTouch(0).position);
+        }
+        else
+        {
+            ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+        }
+
         Vector3 dir = ray.direction.normalized;
 
         GameManager.Instance.CurrentBall--;
         _cannonAnim.ShootAnim();
+
         if (inst.TryGetComponent<Ball>(out var ball))
         {
             ball.Rigibody.isKinematic = false;
             ball.Rigibody.AddForce(dir * firePower, ForceMode.Impulse);
         }
+      
     }
 }

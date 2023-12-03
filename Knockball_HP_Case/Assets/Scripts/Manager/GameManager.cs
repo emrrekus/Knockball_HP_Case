@@ -12,23 +12,24 @@ public class GameManager : MonoBehaviour
 
     private void Awake()
     {
-        if (Instance != null && Instance != this)
+        if (Instance == null)
         {
-            Destroy(this);
-            return;
+            Instance = this;
+            DontDestroyOnLoad(gameObject);
         }
-
-        Instance = this;
-        DontDestroyOnLoad(this.gameObject);
+        else
+        {
+            Destroy(gameObject);
+        }
 
         _beginLevel = 0;
     }
 
 
-    [Header("Levels")] [SerializeField] private GameObject[] _levels;
+    private int _beginScore;
     private int _beginLevel;
     private int _currentLevel;
-    private bool _isLevelCompleted;
+
     public int CurrentLevel => _currentLevel;
 
     public event Func<int, int> levelCurrentBall;
@@ -53,16 +54,20 @@ public class GameManager : MonoBehaviour
 
     public float NeededBall;
 
+    public bool isWinorLosePanelOpen;
 
-    public event Action vignetteOpen;
-    public event Action vignetteClose;
+
+
 
     public event Action loseUI;
+    public event Action winUI;
+
+    public event Action<int, bool> levelOpenAndClose;
+    public event Func<int> levelsLenght;
 
 
     private void Start()
     {
-        _isCanShoot = false;
         Startup();
     }
 
@@ -84,21 +89,21 @@ public class GameManager : MonoBehaviour
     {
         if (CurrentBall <= 0)
         {
-            Timer(true);
-            vignetteOpen?.Invoke();
+            Timer(true,false);
+           
         }
 
         if (_currentTime > 5)
         {
-            Timer(false);
+            Timer(false,true);
             Lose();
             _currentTime = 0;
         }
 
         if (_isDroppedCompleted)
         {
-            vignetteClose?.Invoke();
-            Timer(false);
+            
+            Timer(false,true);
             LevelUp();
         }
     }
@@ -106,23 +111,26 @@ public class GameManager : MonoBehaviour
     public void LevelUp()
     {
         _currentTime = 0f;
-        _isCanShoot = true;
+      
         _isDroppedCompleted = false;
-        _levels[_currentLevel].SetActive(false);
+
+        levelOpenAndClose?.Invoke(_currentLevel, false);
         _currentLevel++;
 
 
-        if (_currentLevel == _levels.Length)
+        if (_currentLevel == levelsLenght?.Invoke())
         {
+            winUI?.Invoke();
+            _isCanShoot = false;
             _isDroppedCompleted = false;
+            _currentLevel = _beginLevel;
             return;
         }
 
-        _levels[_currentLevel].SetActive(true);
+        levelOpenAndClose?.Invoke(_currentLevel, true);
 
         CurrentLevelDefinition(_currentLevel);
         _droppedObject = 0f;
-        _isLevelCompleted = true;
     }
 
     public void Lose()
@@ -134,7 +142,14 @@ public class GameManager : MonoBehaviour
 
     public void Startup()
     {
+        isWinorLosePanelOpen = false;
+        _isCanShoot = false;
+        Timer(false,false);
+
+        _score = _beginScore;
+        levelOpenAndClose?.Invoke(_currentLevel, false);
         _currentLevel = _beginLevel;
+        levelOpenAndClose?.Invoke(_currentLevel, true);
         CurrentLevelDefinition(_currentLevel);
     }
 
@@ -143,7 +158,7 @@ public class GameManager : MonoBehaviour
         _droppedObject = fallingObject;
 
 
-        if (_droppedObject >= ChildCount)
+        if (_droppedObject >= ChildCount && !isWinorLosePanelOpen)
         {
             return _isDroppedCompleted = true;
         }
@@ -167,9 +182,9 @@ public class GameManager : MonoBehaviour
         _score += score;
     }
 
-    private void Timer(bool activity)
+    private void Timer(bool activity,bool canShoot)
     {
-        _isCanShoot = activity ? false : true;
+        _isCanShoot = canShoot;
         _currentTime += Time.deltaTime;
         timer?.Invoke(_currentTime, activity);
     }
