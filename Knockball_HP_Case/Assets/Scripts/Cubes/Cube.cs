@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
-public class Cube : MonoBehaviour
+public class Cube : SingletonDerivedClasses
 {
     public float Point;
 
@@ -12,5 +12,10 @@ public class Cube : MonoBehaviour
     private void Start()
     {
         Point = Random.Range(1, 20);
+    }
+
+    protected override void OnAwake()
+    {
+        
     }
 }

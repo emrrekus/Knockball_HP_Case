@@ -150,6 +150,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   rb: {fileID: 0}
   _lifetime: 20
+  _ballShotClips: {fileID: 8300000, guid: b545d9c4c6c167f43a440dd4bc2e5aa8, type: 3}
 --- !u!1 &5111744153498929373
 GameObject:
   m_ObjectHideFlags: 0

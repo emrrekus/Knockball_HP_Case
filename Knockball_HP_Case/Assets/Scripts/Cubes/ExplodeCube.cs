@@ -8,23 +8,27 @@ public class ExplodeCube : Cube
 {
     [SerializeField] private float explosionForce;
     [SerializeField] private float explosionRadius;
-    [SerializeField] private ParticleSystem _explodePartical;
     [SerializeField] private float _shakeDuration;
     [SerializeField] private float _shakeStrenght;
-    
+    [SerializeField] private AudioClip _explodeClip;
+    [SerializeField] private GameObject _expolodeParticalGO;
+    [SerializeField] private ParticleSystem _explodePartical;
 
-    private void Start()
+
+    protected override void OnAwake()
     {
-        _explodePartical.Stop();
+        ParticleSystem();
     }
 
+   
     private void OnCollisionEnter(Collision collision)
     {
-        if (collision.gameObject.CompareTag("Ball"))
+        if (collision.gameObject.TryGetComponent<Ball>(out var ball))
         {
-            GameManager.Instance.CameraShake(_shakeDuration, _shakeStrenght);
-            AudioManager.Instance.PlayOneShotClip(1);
+            _gameManagerInstance.CameraShake(_shakeDuration, _shakeStrenght);
+            _audioManagerInstance.PlayOneShotClip(_explodeClip);
             _explodePartical.Play();
+            _expolodeParticalGO.SetActive(true);
             Explode();
         }
     }
@@ -41,5 +45,11 @@ public class ExplodeCube : Cube
                 rb.AddExplosionForce(explosionForce, transform.position, explosionRadius, 3.0f, ForceMode.Impulse);
             }
         }
+    }
+
+    private void ParticleSystem()
+    {
+        _expolodeParticalGO.SetActive(false);
+        _explodePartical.Stop();
     }
 }

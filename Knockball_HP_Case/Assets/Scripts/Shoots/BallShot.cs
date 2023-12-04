@@ -3,19 +3,20 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class BallShot : MonoBehaviour
+public class BallShot : SingletonDerivedClasses
 {
     [SerializeField] private float firePower;
     [SerializeField] private BallObjectPooling _ballObjectPooling;
     [SerializeField] private CannonAnim _cannonAnim;
 
-
+    [SerializeField] private LevelController _levelController;
     private bool CanShoot;
 
-    private void Awake()
+    private void Start()
     {
         _ballObjectPooling = GetComponent<BallObjectPooling>();
     }
+
 
     private void Update()
     {
@@ -24,12 +25,12 @@ public class BallShot : MonoBehaviour
             Shoot();
         }
     }
-    
+
     //Both PC and mobile compatible shoot mechanics. We play shooting mechanics, animations and sounds that should play in shooting mechanics.
-    
+
     void Shoot()
     {
-        if (!GameManager.Instance.CanShoot) return;
+        if (!_gameManagerInstance.CanShoot) return;
 
         var inst = _ballObjectPooling.GetBall();
         inst.transform.position = _ballObjectPooling.SpawnPoint.position;
@@ -47,15 +48,20 @@ public class BallShot : MonoBehaviour
 
         Vector3 dir = ray.direction.normalized;
 
-        GameManager.Instance.CurrentBall--;
+        _levelController.CurrentBall--;
         _cannonAnim.ShootAnim();
-        AudioManager.Instance.PlayOneShotClip(0);
+       
 
         if (inst.TryGetComponent<Ball>(out var ball))
         {
+            _audioManagerInstance.PlayOneShotClip(ball.BallShotClip);
             ball.Rigibody.isKinematic = false;
             ball.Rigibody.AddForce(dir * firePower, ForceMode.Impulse);
         }
-      
+    }
+
+    protected override void OnAwake()
+    {
+        
     }
 }

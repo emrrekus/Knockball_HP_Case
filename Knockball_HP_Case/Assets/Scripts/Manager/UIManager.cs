@@ -7,7 +7,16 @@ using UnityEngine.EventSystems;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
-public class UIManager : MonoBehaviour
+public enum UIPage
+{
+    MainMenu,
+    GamePlay,
+    Lose,
+    Win
+}
+
+
+public class UIManager : SingletonDerivedClasses
 {
     [Header("Levels")] [SerializeField] private TMP_Text _level;
     [SerializeField] private Image _backgroundLevelBar;
@@ -17,8 +26,7 @@ public class UIManager : MonoBehaviour
 
     [SerializeField] private Image _bacgroundBallsCount;
 
-    [Header("Score")] 
-    [SerializeField] private TMP_Text _score;
+    [Header("Score")] [SerializeField] private TMP_Text _score;
     [SerializeField] private TMP_Text _bestScore;
     [SerializeField] private TMP_Text _loseScoreText;
     [SerializeField] private TMP_Text _winScoreText;
@@ -34,29 +42,41 @@ public class UIManager : MonoBehaviour
     [Header("Buttons")] [SerializeField] private GameObject _mainMenuButtons;
     [SerializeField] private GameObject _exitButtons;
 
+    [Header("Implement Class")] [SerializeField]
+    private Timer _timer;
+
+    [SerializeField] private LevelController _levelController;
+
+    [Header("Level Scene")] [SerializeField]
+    private string _sceneName;
+
+    [Header("Input Handler")] [SerializeField]
+    private InputHandler _ınputHandler;
 
     private bool _sliderActivity;
     private int _activeUI;
+    private int _tryPlay;
 
 
     private void Start()
     {
+        _tryPlay = 0;
         _slider.value = AudioVolumeData.GetAudioVolume();
         BestScore();
     }
 
     private void OnEnable()
     {
-        GameManager.Instance.timer += Timer;
-        GameManager.Instance.loseUI += LoseGame;
-        GameManager.Instance.winUI += WinGame;
+        _timer.timer += TimerText;
+        _gameManagerInstance.loseUI += LoseGame;
+        _gameManagerInstance.winUI += WinGame;
     }
 
     private void OnDisable()
     {
-        GameManager.Instance.timer -= Timer;
-        GameManager.Instance.loseUI -= LoseGame;
-        GameManager.Instance.winUI -= WinGame;
+        _timer.timer -= TimerText;
+        _gameManagerInstance.loseUI -= LoseGame;
+        _gameManagerInstance.winUI -= WinGame;
     }
 
     private void Update()
@@ -64,31 +84,53 @@ public class UIManager : MonoBehaviour
         LevelBar();
         BallsCount();
         Score();
-        TouchStart();
-        SliderValue();
+        
+        if(_ınputHandler.TouchStart() && _tryPlay <1)
+                PlayGame();
     }
 
 
     #region UI Buttons
 
+    public void PlayGame()
+    {
+        _tryPlay++;
+        _gameManagerInstance.CanShot(true);
+        gameUI[(int)UIPage.MainMenu].SetActive(false);
+        gameUI[(int)UIPage.GamePlay].SetActive(true);
+        _activeUI = (int)UIPage.GamePlay;
+    }
+
     private void LoseGame()
     {
-        GameManager.Instance.isWinorLosePanelOpen = true;
+        _activeUI = (int)UIPage.Lose;
         _mainMenuButtons.SetActive(false);
         _exitButtons.SetActive(false);
-        gameUI[1].SetActive(false);
-        gameUI[2].SetActive(true);
+        gameUI[(int)UIPage.GamePlay].SetActive(false);
+        gameUI[(int)UIPage.Lose].SetActive(true);
         _loseScoreText.text = "Score: " + _score.text;
     }
 
     private void WinGame()
     {
-        GameManager.Instance.isWinorLosePanelOpen = true;
         _mainMenuButtons.SetActive(false);
         _exitButtons.SetActive(false);
-        gameUI[1].SetActive(false);
-        gameUI[3].SetActive(true);
+        gameUI[(int)UIPage.GamePlay].SetActive(false);
+        gameUI[(int)UIPage.Win].SetActive(true);
+        _activeUI = (int)UIPage.Win;
         _winScoreText.text = "Score: " + _score.text;
+    }
+
+
+    public void TryGame()
+    {
+        gameUI[_activeUI].SetActive(false);
+        _gameManagerInstance.CanShot(false);
+        _mainMenuButtons.SetActive(true);
+        _exitButtons.SetActive(true);
+        _gameManagerInstance.ScoreDelete();
+        gameUI[(int)_levelController.CurrentLevel].SetActive(true);
+        _gameManagerInstance.SceneLoad(_sceneName);
     }
 
     public void QuitGame()
@@ -100,23 +142,6 @@ public class UIManager : MonoBehaviour
 #endif
     }
 
-    public void TryGame()
-    {
-        gameUI[GameManager.Instance.CurrentLevel].SetActive(false);
-        _mainMenuButtons.SetActive(true);
-        _exitButtons.SetActive(true);
-        gameUI[0].SetActive(true);
-        GameManager.Instance.Startup();
-        SceneManager.LoadScene("Scenes/SampleScene");
-    }
-    
-    public void PlayGame()
-    {
-        GameManager.Instance.GameisPlay(true);
-        gameUI[0].SetActive(false);
-        gameUI[1].SetActive(true);
-    }
-
     #endregion
 
 
@@ -124,22 +149,22 @@ public class UIManager : MonoBehaviour
 
     private void LevelBar()
     {
-        _level.text = (GameManager.Instance.CurrentLevel + 1).ToString();
-        _backgroundLevelBar.fillAmount = GameManager.Instance.DroppedObject / GameManager.Instance.ChildCount;
+        _level.text = (_levelController.CurrentLevel + 1).ToString();
+        _backgroundLevelBar.fillAmount = _levelController.DropObject / _levelController.ChildCount;
     }
 
     private void BallsCount()
     {
-        _ballsCount.text = GameManager.Instance.CurrentBall.ToString();
-        _bacgroundBallsCount.fillAmount = GameManager.Instance.CurrentBall / GameManager.Instance.NeededBall;
+        _ballsCount.text = _levelController.CurrentBall.ToString();
+        _bacgroundBallsCount.fillAmount = _levelController.CurrentBall / _levelController.NeededBall;
     }
 
     private void Score()
     {
-        _score.text = GameManager.Instance.Point.ToString();
+        _score.text = _gameManagerInstance.Point.ToString();
     }
 
-    private void Timer(float currentTime, bool activity)
+    private void TimerText(float currentTime, bool activity)
     {
         _timerObject.SetActive(activity);
         TimeSpan timeSpan = TimeSpan.FromSeconds(currentTime);
@@ -154,12 +179,14 @@ public class UIManager : MonoBehaviour
 
     #endregion
 
-    #region  UI Audio
+    #region UI Audio
 
     public void AudioSettings()
     {
         _sliderActivity = !_sliderActivity;
         _audioSlider.SetActive(_sliderActivity);
+
+        SliderValue();
     }
 
     private void SliderValue()
@@ -170,24 +197,8 @@ public class UIManager : MonoBehaviour
 
     #endregion
 
-   
 
-    public void TouchStart()
+    protected override void OnAwake()
     {
-        if (Input.touchCount > 0 && Input.GetTouch(0).phase == TouchPhase.Began)
-        {
-            Vector3 touchPosition = Input.GetTouch(0).position;
-            if (EventSystem.current.IsPointerOverGameObject(Input.GetTouch(0).fingerId))
-            {
-                Debug.Log("Button Clicked!");
-            }
-            else
-            {
-                PlayGame();
-            }
-        }
     }
-
-
-   
 }

@@ -4,25 +4,10 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class AudioManager : MonoBehaviour
+public class AudioManager : Singleton<AudioManager>
 {
-    public static AudioManager Instance { get; private set; }
+  
 
-
-    private void Awake()
-    {
-        if (Instance == null)
-        {
-            Instance = this;
-            DontDestroyOnLoad(gameObject);
-        }
-        else
-        {
-            Destroy(gameObject);
-        }
-    }
-
-    [SerializeField] private AudioClip[] _oneShotclips;
     [SerializeField] private AudioSource _audioSource;
 
    
@@ -33,9 +18,9 @@ public class AudioManager : MonoBehaviour
         Volume();
     }
 
-    public void PlayOneShotClip(int clips)
+    public void PlayOneShotClip(AudioClip clips)
     {
-        _audioSource.PlayOneShot(_oneShotclips[clips]);
+        _audioSource.PlayOneShot(clips);
     }
 
     private void Volume()

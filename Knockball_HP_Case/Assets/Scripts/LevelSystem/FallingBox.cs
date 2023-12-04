@@ -3,25 +3,30 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class FallingBox : MonoBehaviour
+public class FallingBox : SingletonDerivedClasses
 {
-    private float _fallingObject;
-    [SerializeField] private string _triggerObjectName;
-    [SerializeField] private string _triggerSecondObjectName;
+    private int _fallingObject;
 
-    //We provide control of the dropped objects and if the dropped object is a cube, we add its current point value to the score we keep in the game manager.
+    [SerializeField] private LevelController _levelController;
+    
+
+    
+
     private void OnTriggerEnter(Collider other)
     {
-        if (other.CompareTag(_triggerObjectName) || other.CompareTag(_triggerSecondObjectName))
+        if (other.TryGetComponent<Cube>(out var cube))
         {
             _fallingObject++;
 
-            if (GameManager.Instance.DroppedObjectCheck(_fallingObject)) _fallingObject = 0;
+            if (_levelController.DroppedObjectCheck(_fallingObject)) _fallingObject = 0;
+            // if (_gameManagerInstance.DroppedObjectCheck(_fallingObject)) _fallingObject = 0;
+            
+            _gameManagerInstance.Score(cube.Point);
         }
+    }
 
-        if (other.TryGetComponent<Cube>(out var cube))
-        {
-           GameManager.Instance.Score(cube.Point);
-        }
+    protected override void OnAwake()
+    {
+        
     }
 }
