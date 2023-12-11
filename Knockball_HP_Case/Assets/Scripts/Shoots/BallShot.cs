@@ -10,7 +10,7 @@ public class BallShot : SingletonDerivedClasses
     [SerializeField] private CannonAnim _cannonAnim;
 
     [SerializeField] private LevelController _levelController;
-    private bool CanShoot;
+  
 
     private void Start()
     {
@@ -45,6 +45,8 @@ public class BallShot : SingletonDerivedClasses
         {
             ray = Camera.main.ScreenPointToRay(Input.mousePosition);
         }
+        
+      
 
         Vector3 dir = ray.direction.normalized;
 
@@ -56,7 +58,8 @@ public class BallShot : SingletonDerivedClasses
         {
             _audioManagerInstance.PlayOneShotClip(ball.BallShotClip);
             ball.Rigibody.isKinematic = false;
-            ball.Rigibody.AddForce(dir * firePower, ForceMode.Impulse);
+             ball.Rigibody.AddForce(dir * firePower, ForceMode.Impulse);
+           
         }
     }
 

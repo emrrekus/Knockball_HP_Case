@@ -9,19 +9,18 @@ using UnityEngine.SceneManagement;
 
 public class GameManager : Singleton<GameManager>
 {
-   
+    [SerializeField] private Camera _camera;
     private bool _isCanShoot = true;
     private int _beginScore = 0;
     private float _score;
     private float _droppedObject;
     private bool _isCanPlay;
 
-    public bool CanPlay => _isCanPlay;
     public bool CanShoot => _isCanShoot;
     
     public float Point => _score;
-    public event Action loseUI;
-    public event Action winUI;
+    public event Action LoseUI;
+    public event Action WinUI;
    
 
     public void CanShot(bool canShoot)
@@ -32,14 +31,14 @@ public class GameManager : Singleton<GameManager>
   
     public void LevelCompleted()
     {
-        winUI?.Invoke();
+        WinUI?.Invoke();
         SaveScore();
         
     }
 
     public void LoseCompleted()
     {
-       loseUI?.Invoke();
+       LoseUI?.Invoke();
        SaveScore();
     }
 
@@ -71,8 +70,8 @@ public class GameManager : Singleton<GameManager>
 
     public void CameraShake(float shakeDuration, float shakeStrenght)
     {
-        Camera.main.DOShakePosition(shakeDuration, shakeStrenght, fadeOut: true);
-        Camera.main.DOShakeRotation(shakeDuration, shakeStrenght, fadeOut: true);
+        _camera.DOShakePosition(shakeDuration, shakeStrenght, fadeOut: true);
+        _camera.DOShakeRotation(shakeDuration, shakeStrenght, fadeOut: true);
     }
 
    

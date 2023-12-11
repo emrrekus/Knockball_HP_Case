@@ -2533,6 +2533,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 16a80b60e799ae848b527b59aa2a50c4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _camera: {fileID: 963194230}
 --- !u!4 &310893224
 Transform:
   m_ObjectHideFlags: 0

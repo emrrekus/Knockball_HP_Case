@@ -68,15 +68,15 @@ public class UIManager : SingletonDerivedClasses
     private void OnEnable()
     {
         _timer.timer += TimerText;
-        _gameManagerInstance.loseUI += LoseGame;
-        _gameManagerInstance.winUI += WinGame;
+        _gameManagerInstance.LoseUI += LoseGame;
+        _gameManagerInstance.WinUI += WinGame;
     }
 
     private void OnDisable()
     {
         _timer.timer -= TimerText;
-        _gameManagerInstance.loseUI -= LoseGame;
-        _gameManagerInstance.winUI -= WinGame;
+        _gameManagerInstance.LoseUI -= LoseGame;
+        _gameManagerInstance.WinUI -= WinGame;
     }
 
     private void Update()
